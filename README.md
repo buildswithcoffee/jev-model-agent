@@ -52,7 +52,7 @@ export default defineAgent({
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/buildswithcoffee/simple-agent-with-jev.git
+git clone <this-repo-url>
 cd simple-agent-with-jev
 npm install
 ```

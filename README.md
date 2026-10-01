@@ -1,4 +1,4 @@
-# Jev Model Agent Example on Eve Vercel AI Gateway
+# Jev Model Agent Example on Eve and Vercel AI Gateway
 
 A retail support agent built with [eve](https://eve.dev). It uses jev, TypeSafe's classification model, to choose which model answers each message.
 

@@ -1,35 +1,79 @@
-# jev-example
+# simple-agent-with-jev
 
-This is an [eve](https://eve.dev) agent bootstrapped with [`eve init`](https://eve.dev/docs/reference/cli#eve-init).
+A retail support agent built with [eve](https://eve.dev). It uses jev, TypeSafe's evaluation model, to pick which model answers each request.
 
-## Getting started
+## How it works
 
-First, run the development server:
+Each request goes through two jev steps.
+
+1. **Route the model.** Before the turn starts, `auto()` in `agent/agent.ts` asks jev to put the request in one of five categories. eve then runs the turn on the model listed for that category.
+2. **Find the specific need.** The agent calls the `classify-request` tool, which asks jev a narrower question, like whether a return is in store or online. The agent prints the need and its probabilities, then answers.
+
+The two steps answer different questions, so they never repeat each other's work.
+
+Skills in `agent/skills/` are separate. The model loads one with `load_skill` when a request matches the skill's description.
+
+All model calls, including jev, go through the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway).
+
+| Category | Model |
+| --- | --- |
+| Personal_shopping | google/gemini-3.5-flash |
+| Product_details | openai/gpt-5-nano |
+| Technical_support | openai/gpt-5.6-sol |
+| Refunds_and_exchanges | google/gemini-3.5-flash |
+| Promotions | openai/gpt-5.6-luna-fast |
+
+## Setup
+
+You need Node.js 24 or newer and a Vercel account with AI Gateway access.
+
+1. Clone the repo and install dependencies.
+
+   ```bash
+   git clone https://github.com/buildswithcoffee/simple-agent-with-jev.git
+   cd simple-agent-with-jev
+   npm install
+   ```
+
+2. Start the agent.
+
+   ```bash
+   npm run dev
+   ```
+
+3. If eve asks you to connect, run `/login` in the terminal UI. Choose your Vercel account, or paste an AI Gateway API key.
+
+## Try it
+
+Send a message such as:
+
+- how do I start a return?
+- what size should I get in this jacket?
+- my checkout keeps failing
+
+The chat shows jev's specific need and probabilities. The footer shows the model the request was routed to, for example `dynamic model · google/gemini-3.5-flash`.
+
+## Project files
+
+| File | What it does |
+| --- | --- |
+| `agent/agent.ts` | Categories and the model for each one |
+| `agent/tools/classify-request.ts` | The list of specific needs jev picks from |
+| `agent/instructions.md` | What the agent does and what it prints |
+| `agent/skills/` | Guidance the model loads when it fits the request |
+
+To send a category to a different model, change its `model` in `agent/agent.ts`.
+
+## Deploy
 
 ```bash
-eve dev
+npm run deploy
 ```
 
-The development TUI opens an interactive session where you can send messages to your agent.
-
-Start by editing `agent/instructions.md` to define the agent's identity, purpose, tone, and response guidelines. Configure its model and runtime behavior in `agent/agent.ts`.
-
-Add capabilities under `agent/`, including tools, connections, channels, skills, subagents, and schedules. eve reloads your changes as you work.
+This links a Vercel project if needed and deploys to production. On Vercel, the deployment reaches the AI Gateway through the project's OIDC credentials. To host somewhere else, set `AI_GATEWAY_API_KEY`. See the [eve deployment docs](https://eve.dev/docs/guides/deployment/vercel).
 
 ## Learn more
 
-To learn more about eve, explore these resources:
-
-- [eve documentation](https://eve.dev/docs) — learn about eve's features and authoring APIs.
-- [Build an Agent tutorial](https://eve.dev/docs/tutorial/first-agent) — build and deploy an agent step by step.
-- [eve on GitHub](https://github.com/vercel/eve) — view the source and contribute.
-
-## Deploy on Vercel
-
-Deploy your agent to [Vercel](https://vercel.com) from the project root:
-
-```bash
-eve deploy
-```
-
-`eve deploy` links a Vercel project if needed and deploys the agent to production. See the [eve deployment documentation](https://eve.dev/docs/guides/deployment/vercel) for authentication, environment variables, and deployment options.
+- [eve documentation](https://eve.dev/docs)
+- [Automatic model selection](https://eve.dev/docs/guides/evaluate)
+- [Skills](https://eve.dev/docs/skills)

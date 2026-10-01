@@ -1,25 +1,37 @@
 import { defineAgent } from "eve";
 import { auto } from "eve/models";
-import { CATEGORIES } from "./lib/category";
-
-/**
- * The choice -> model mapping.
- *
- * jev classifies the incoming prompt into one of these categories (using the
- * descriptions in agent/lib/category.ts), and eve runs the turn on the model
- * sitting next to it. Re-point a category by editing its model here.
- */
-export const ROUTING = {
-  Personal_shopping:     { model: "google/gemini-3.5-flash",  description: CATEGORIES.Personal_shopping },
-  Sizing:                { model: "openai/gpt-5-nano",        description: CATEGORIES.Sizing },
-  Product_details:       { model: "openai/gpt-5-nano",        description: CATEGORIES.Product_details },
-  Technical_support:     { model: "openai/gpt-5.6-sol",       description: CATEGORIES.Technical_support },
-  Refunds_and_exchanges: { model: "google/gemini-3.5-flash",  description: CATEGORIES.Refunds_and_exchanges },
-  Promotions:            { model: "openai/gpt-5.6-luna-fast", description: CATEGORIES.Promotions },
-} as const;
 
 export default defineAgent({
+  /**
+   * The category -> model mapping.
+   *
+   * Before each turn, jev reads the recent conversation and picks one of these
+   * categories by its description, and eve runs the turn on the model next to
+   * it. Re-point a category by editing its model here.
+   */
   model: auto({
-    options: ROUTING,
+    model: "typesafe-ai/jev",
+    options: {
+      Personal_shopping: {
+        model: "google/gemini-3.5-flash",
+        description: "Wants help choosing what to buy, including size or fit.",
+      },
+      Product_details: {
+        model: "openai/gpt-5-nano",
+        description: "Asking about a product's specs or availability.",
+      },
+      Technical_support: {
+        model: "openai/gpt-5.6-sol",
+        description: "Something is broken or not working.",
+      },
+      Refunds_and_exchanges: {
+        model: "google/gemini-3.5-flash",
+        description: "Wants money back or to return an item.",
+      },
+      Promotions: {
+        model: "openai/gpt-5.6-luna-fast",
+        description: "Asking about discounts or deals.",
+      },
+    },
   }),
 });
